@@ -209,7 +209,6 @@ with tab_analisis:
         "model, beban, kapasitas, dan validitas data sensor."
     )
 
-
     # TANYA JAWAB UMUM TEKNIK SIPIL
     st.divider()
     st.subheader("💬 Tanya Jawab Umum Teknik Sipil")
