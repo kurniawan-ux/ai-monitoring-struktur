@@ -110,13 +110,58 @@ with st.sidebar:
 )
 
     st.markdown("<p style='color:#94A3B8; font-size:14px; margin-top:-10px;'>Analis AI Engineer Structure<br>Magister Teknik Sipil</p>", unsafe_allow_html=True)
-    st.markdown("---")
-    st.markdown("### 📚 **Informasi Edukasi**")
-    st.info("""
-    **Metode AI:** *Multi-Layer Perceptron (MLP)* Jaringan Saraf Tiruan.
     
-    **Konsep Mekanika:** AI bertindak sebagai *Virtual Sensor* untuk memetakan hubungan non-linear antara regangan material (*microstrain*) akibat beban lalu lintas dengan respons gaya dalam momen lentur (**kNm**).
-    """)
+    st.markdown("---")
+    
+    st.markdown(
+        """
+        <div style="color:#FFFFFF; font-size:16px; font-weight:bold;">
+            📇 Profil & Kontak
+        </div>
+        <div style="color:#E2E8F0; line-height:2.0; font-size:14px;">
+            👨‍💻 <b>Kurniawan Ilyas</b><br>
+            🏗️ Analis AI Engineer Structure<br>
+            🎓 Magister Teknik Sipil — UNISSULA<br><br>
+            ✉️ <b>Email:</b>
+            <a href="mailto:ccms17202020@gmail.com"
+               style="color:#7DD3FC;">ccms17202020@gmail.com</a><br>
+            📱 <b>Hotline:</b>
+            <a href="https://wa.me/6282187948080"
+               style="color:#7DD3FC;">6282187948080</a><br>
+            ▶️ <b>YouTube:</b>
+            <a href="https://www.youtube.com/@cv.konsultanindonesia4341"
+               style="color:#7DD3FC;">CV Konsultan Indonesia</a><br>
+            📍 <b>Kota:</b> Kendari<br>
+            🌏 <b>Provinsi:</b> Sulawesi Tenggara, Indonesia
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown("---")
+    
+    st.markdown(
+        """
+        <div style="
+            background-color:#162844;
+            color:#FFFFFF;
+            padding:16px;
+            border-radius:10px;
+            font-size:16px;
+            line-height:1.8;
+            text-align:center;
+            font-style:italic;
+            border-left:4px solid #38BDF8;
+        ">
+            <div style="font-size:22px; margin-bottom:10px;">💡</div>
+            <b>Bertahan</b> bukan tentang seberapa berat
+            beban engkau genggam, tetapi seberapa lama
+            beban engkau genggam.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
     st.markdown("---")
     st.markdown("<p style='text-align:center; color:#64748B; font-size:12px;'>SHM AI System v2.0</p>", unsafe_allow_html=True)
 
@@ -148,6 +193,37 @@ if not FILE_EXCEL.exists():
 
 df = pd.read_excel(FILE_EXCEL)
 
+
+
+
+# AI TANYA JAWAB TEKNIK SIPIL - SIDEBAR
+with st.sidebar.expander("🤖 AI Tanya Jawab Teknik Sipil", expanded=False):
+    st.caption("Asisten pengetahuan teknik sipil berbasis aturan lokal.")
+
+    with st.form("form_ai_sidebar"):
+        pertanyaan_sidebar = st.text_area(
+            "Tuliskan pertanyaan Anda:",
+            placeholder="Contoh: Apa itu beton?",
+            height=100,
+        )
+        kirim_sidebar = st.form_submit_button("🔎 Cari Jawaban")
+
+    if kirim_sidebar:
+        if pertanyaan_sidebar.strip():
+            st.session_state["jawaban_sidebar"] = jawab_lokal(
+                pertanyaan_sidebar.strip()
+            )
+        else:
+            st.warning("Masukkan pertanyaan terlebih dahulu.")
+
+    if st.session_state.get("jawaban_sidebar"):
+        st.markdown("**Jawaban:**")
+        st.write(st.session_state["jawaban_sidebar"])
+
+# ============================================================
+# 6. KONTEN FRONT-END SETIAP TAB
+# ============================================================
+
 tab_dashboard, tab_edukasi, tab_data, tab_analisis = st.tabs(
     [
         "📊 Dasbor Monitoring",
@@ -157,18 +233,9 @@ tab_dashboard, tab_edukasi, tab_data, tab_analisis = st.tabs(
     ]
 )
 
-# ============================================================
-# 6. KONTEN FRONT-END SETIAP TAB
-# ============================================================
-
 # TAB 1: DASBOR MONITORING
 with tab_dashboard:
     st.subheader("Analisis Gaya Dalam dan Keandalan Struktur Jembatan")
-    st.caption(
-        "Dashboard ini menggunakan data dari data_sensor_jembatan.xlsx. "
-        "Hasil evaluasi kapasitas memerlukan parameter desain yang terverifikasi."
-    )
-
     st.metric("Jumlah baris data Excel", f"{len(df):,}")
     st.metric("Jumlah kolom data", f"{len(df.columns):,}")
 
@@ -200,7 +267,7 @@ with tab_dashboard:
     st.write("Jumlah data kosong per kolom:")
     st.dataframe(
         df.isna().sum().rename("Jumlah data kosong").to_frame(),
-        use_container_width=True
+        width="stretch"
     )
 
 
@@ -250,17 +317,22 @@ if simpan:
         "Momen_Aktif_kNm": momen_aktif
     }
 
-    st.session_state.setdefault("data_input_sensor", [])
-    st.session_state["data_input_sensor"].append(data_baru)
+    try:
+        df_baru = pd.DataFrame([data_baru])
+        df_gabungan = pd.concat([df, df_baru], ignore_index=True)
 
-    st.success("Data sensor ditambahkan ke sesi aplikasi.")
+        df_gabungan.to_excel(FILE_EXCEL, index=False)
 
-if st.session_state.get("data_input_sensor"):
-    st.markdown("#### Data Sensor yang Diinput")
-    st.dataframe(
-        pd.DataFrame(st.session_state["data_input_sensor"]),
-        use_container_width=True
-    )
+        df = df_gabungan
+        st.session_state["data_input_sensor"] = (
+            df_gabungan.to_dict(orient="records")
+        )
+
+        st.success("Data sensor berhasil disimpan ke file Excel.")
+        st.dataframe(df_gabungan.tail(10), width="stretch")
+
+    except Exception as e:
+        st.error(f"Gagal menyimpan data ke Excel: {e}")
 
 # TAB 2: DOKUMENTASI EDUKASI
 with tab_edukasi:
@@ -282,12 +354,10 @@ with tab_edukasi:
 # TAB 3: BASIS DATA EXCEL
 with tab_data:
     st.subheader("Basis Data Sensor Jembatan")
+    st.markdown("### Input Data Sensor")
 
-    st.write(f"Nama file: {FILE_EXCEL.name}")
-    st.write(f"Jumlah baris: {len(df):,}")
-    st.write(f"Jumlah kolom: {len(df.columns):,}")
 
-    st.dataframe(df, use_container_width=True)
+    st.dataframe(df, width="stretch")
 
     st.download_button(
         label="Unduh data Excel",
@@ -305,7 +375,7 @@ with tab_analisis:
     st.write("Jumlah baris data sensor:", len(df))
 
     st.subheader("Data sensor jembatan")
-    st.dataframe(df, use_container_width=True)
+    st.dataframe(df, width="stretch")
 
     st.info(
         "Data sensor ditampilkan untuk pemeriksaan awal. "
@@ -313,6 +383,47 @@ with tab_analisis:
         "model, beban, kapasitas, dan validitas data sensor."
     )
 
+    
+    st.subheader("Skema Elemen Struktur Jembatan")
+
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots(figsize=(12, 3))
+
+    # Gelagar utama: skema ilustratif, bukan gambar as-built
+    ax.plot([0, 10], [1, 1], linewidth=8, color="steelblue")
+
+    # Tumpuan kiri dan kanan
+    ax.plot([0, 0.5, -0.5, 0], [1, 0, 0, 1], color="black")
+    ax.plot([10, 10.5, 9.5, 10], [1, 0, 0, 1], color="black")
+
+    # Titik sensor
+    posisi_sensor = [0, 5, 10]
+    label_sensor = [
+        "Tumpuan Kiri",
+        "Tengah Bentang",
+        "Tumpuan Kanan",
+    ]
+
+    for x, label in zip(posisi_sensor, label_sensor):
+        ax.scatter(x, 1, color="red", s=90, zorder=3)
+        ax.annotate(
+            label,
+            (x, 1),
+            xytext=(0, 18),
+            textcoords="offset points",
+            ha="center",
+        )
+
+    ax.set_xlim(-1, 11)
+    ax.set_ylim(-0.5, 2)
+    ax.set_xlabel("Posisi sepanjang bentang (skema)")
+    ax.set_yticks([])
+    ax.set_title("Skema Gelagar dan Lokasi Sensor")
+    ax.grid(axis="x", alpha=0.25)
+
+    st.pyplot(fig)
+    plt.close(fig)
     
     # =========================================================
     # TANYA JAWAB UMUM TEKNIK SIPIL BERBASIS AI
