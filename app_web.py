@@ -209,3 +209,114 @@ with tab_analisis:
         "model, beban, kapasitas, dan validitas data sensor."
     )
 
+
+    # TANYA JAWAB UMUM TEKNIK SIPIL
+    st.divider()
+    st.subheader("💬 Tanya Jawab Umum Teknik Sipil")
+    st.caption(
+        "Topik: struktur, beton, baja, geoteknik, jalan, "
+        "jembatan, material, pengujian, dan manajemen konstruksi."
+    )
+
+    pertanyaan = st.text_area(
+        "Tuliskan pertanyaan Teknik Sipil Anda:",
+        placeholder=(
+            "Contoh: Apa dasar pemeriksaan lentur balok beton "
+            "bertulang berdasarkan SNI?"
+        ),
+        key="pertanyaan_teknik_sipil",
+        height=100,
+    )
+
+    if st.button("Cari Jawaban", key="btn_tanya_teknik_sipil"):
+        if not pertanyaan.strip():
+            st.warning("Masukkan pertanyaan terlebih dahulu.")
+        else:
+            p = pertanyaan.lower()
+
+            referensi = [
+                {
+                    "kata": ["beton bertulang", "balok beton", "kolom beton"],
+                    "topik": "Struktur beton bertulang",
+                    "jawaban": (
+                        "Pemeriksaan umumnya mencakup kekuatan lentur, "
+                        "geser, aksial, penyaluran tulangan, dan "
+                        "kemampuan layan. Parameter desain dan "
+                        "ketentuan detail harus diperiksa terhadap "
+                        "standar yang berlaku serta kondisi proyek."
+                    ),
+                    "standar": "SNI 2847:2019; ACI 318 sebagai referensi terkait."
+                },
+                {
+                    "kata": ["beban", "beban hidup", "beban mati", "angin"],
+                    "topik": "Beban dan kombinasi pembebanan",
+                    "jawaban": (
+                        "Identifikasi beban mati, beban hidup, angin, "
+                        "gempa, dan beban lain yang relevan. Tentukan "
+                        "kombinasi beban sesuai fungsi bangunan dan "
+                        "ketentuan desain yang berlaku."
+                    ),
+                    "standar": "SNI 1727:2020; SNI 1726:2019 untuk aspek gempa."
+                },
+                {
+                    "kata": ["baja", "profil wf", "struktur baja"],
+                    "topik": "Struktur baja",
+                    "jawaban": (
+                        "Pemeriksaan dapat meliputi tarik, tekan, "
+                        "lentur, geser, tekuk lokal, tekuk lateral, "
+                        "sambungan, dan kondisi layan. Verifikasi "
+                        "mutu material, dimensi, tumpuan, serta "
+                        "kombinasi pembebanan."
+                    ),
+                    "standar": "SNI 1729:2020; AISC 360 sebagai referensi terkait."
+                },
+                {
+                    "kata": ["tanah", "pondasi", "fondasi", "sondir", "cpt"],
+                    "topik": "Geoteknik dan fondasi",
+                    "jawaban": (
+                        "Analisis bergantung pada stratigrafi tanah, "
+                        "hasil investigasi, daya dukung, penurunan, "
+                        "air tanah, dan kondisi konstruksi. Data "
+                        "sondir saja tidak selalu cukup untuk seluruh "
+                        "parameter desain."
+                    ),
+                    "standar": "SNI 8460:2017; standar pengujian tanah ASTM yang relevan."
+                },
+                {
+                    "kata": ["agregat", "semen", "kuat tekan beton", "silinder"],
+                    "topik": "Material dan pengujian beton",
+                    "jawaban": (
+                        "Pastikan prosedur pengambilan sampel, "
+                        "pembuatan benda uji, perawatan, umur uji, "
+                        "dan pengujian mengikuti metode yang sesuai. "
+                        "Hasil harus dibandingkan dengan kriteria "
+                        "penerimaan yang berlaku."
+                    ),
+                    "standar": "SNI terkait beton dan pengujian; ASTM C39/C39M untuk kuat tekan silinder."
+                },
+            ]
+
+            hasil = [
+                r for r in referensi
+                if any(k in p for k in r["kata"])
+            ]
+
+            if hasil:
+                for r in hasil:
+                    st.markdown(f"### {r['topik']}")
+                    st.write(r["jawaban"])
+                    st.caption(
+                        "Referensi awal: " + r["standar"]
+                    )
+            else:
+                st.info(
+                    "Belum ditemukan jawaban pada basis pengetahuan "
+                    "awal. Pertanyaan perlu ditelaah menggunakan "
+                    "standar resmi yang relevan."
+                )
+
+            st.warning(
+                "Verifikasi nomor, edisi, status berlaku, amendemen, "
+                "dan pasal standar pada sumber resmi sebelum "
+                "digunakan untuk keputusan desain atau pemeriksaan."
+            )
