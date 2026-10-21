@@ -109,7 +109,7 @@ with st.sidebar:
     unsafe_allow_html=True
 )
 
-    st.markdown("<p style='color:#94A3B8; font-size:14px; margin-top:-10px;'>Analis AI Engineer Structure<br>Magister Teknik Sipil</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#94A3B8; font-size:14px; margin-top:-10px;'>Analis AI Engineer Structure<br>Mahasiswa S2 Teknik Sipil</p>", unsafe_allow_html=True)
     
     st.markdown("---")
     
@@ -121,7 +121,7 @@ with st.sidebar:
         <div style="color:#E2E8F0; line-height:2.0; font-size:14px;">
             👨‍💻 <b>Kurniawan Ilyas</b><br>
             🏗️ Analis AI Engineer Structure<br>
-            🎓 Magister Teknik Sipil — UNISSULA<br><br>
+            🎓 Mahasiswa S2 Teknik Sipil — UNISSULA<br><br>
             ✉️ <b>Email:</b>
             <a href="mailto:ccms17202020@gmail.com"
                style="color:#7DD3FC;">ccms17202020@gmail.com</a><br>
