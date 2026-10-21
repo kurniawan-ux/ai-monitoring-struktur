@@ -334,21 +334,257 @@ if simpan:
     except Exception as e:
         st.error(f"Gagal menyimpan data ke Excel: {e}")
 
+
 # TAB 2: DOKUMENTASI EDUKASI
 with tab_edukasi:
     st.subheader("Dokumentasi Edukasi Teknik Struktur")
 
-    st.markdown("""
-    **Materi pemeriksaan struktur jembatan**
+    st.caption(
+        "Materi pemeriksaan struktur jembatan: statika, "
+        "gaya dalam, kapasitas elemen, data sensor, dan verifikasi."
+    )
 
-    1. Statika dan mekanika rekayasa.
-    2. Reaksi perletakan dan keseimbangan struktur.
-    3. Diagram gaya geser dan momen lentur.
-    4. Pemeriksaan kapasitas lentur dan geser.
-    5. Interpretasi respons sensor dan keterbatasan data.
-    6. Verifikasi terhadap gambar, spesifikasi, dan standar desain
-       yang berlaku.
-    """)
+    # 1. RUMUS DASAR DAN CONTOH PERHITUNGAN
+    with st.expander(
+        "1. Rumus Dasar dan Contoh Perhitungan",
+        expanded=True
+    ):
+        st.markdown("""
+        **Contoh balok sederhana**
+
+        - Bentang: 6 m
+        - Beban titik di tengah bentang: 12 kN
+        - Tumpuan A: sendi
+        - Tumpuan B: rol
+        - Berat sendiri dan beban lain diabaikan.
+
+        Persamaan keseimbangan:
+        """)
+
+        st.latex(
+            r"\sum F_x=0,\quad \sum F_y=0,\quad \sum M=0"
+        )
+
+        st.markdown("**Reaksi tumpuan**")
+        st.latex(
+            r"R_A=R_B=\frac{P}{2}"
+            r"=\frac{12}{2}=6\ \mathrm{kN}"
+        )
+
+        st.markdown("**Gaya geser maksimum**")
+        st.latex(
+            r"|V_{\max}|=\frac{P}{2}=6\ \mathrm{kN}"
+        )
+
+        st.markdown("**Momen lentur maksimum**")
+        st.latex(
+            r"M_{\max}=\frac{PL}{4}"
+            r"=\frac{12\times6}{4}"
+            r"=18\ \mathrm{kN\cdot m}"
+        )
+
+        st.info(
+            "Hasil berlaku untuk balok sederhana ideal dengan "
+            "satu beban titik di tengah bentang. Ini bukan bukti "
+            "keamanan jembatan aktual."
+        )
+
+    # 2. REAKSI PERLETAKAN DAN KESEIMBANGAN
+    with st.expander(
+        "2. Reaksi Perletakan dan Keseimbangan Struktur"
+    ):
+        st.markdown("""
+        Untuk balok sederhana dengan beban merata penuh q
+        sepanjang bentang L:
+        """)
+
+        st.latex(r"\sum F_y=0")
+        st.latex(r"R_A+R_B=qL")
+
+        st.markdown("**Untuk beban merata simetris:**")
+        st.latex(r"R_A=R_B=\frac{qL}{2}")
+
+        q = st.number_input(
+            "Beban merata q (kN/m)",
+            min_value=0.0,
+            value=10.0,
+            step=1.0,
+            key="edukasi_q"
+        )
+
+        L = st.number_input(
+            "Bentang L (m)",
+            min_value=0.1,
+            value=6.0,
+            step=0.5,
+            key="edukasi_L"
+        )
+
+        RA = q * L / 2
+        RB = q * L / 2
+
+        col1, col2 = st.columns(2)
+        col1.metric("Reaksi tumpuan A", f"{RA:.2f} kN")
+        col2.metric("Reaksi tumpuan B", f"{RB:.2f} kN")
+
+        st.caption(
+            "Asumsi: balok sederhana, beban merata penuh, "
+            "tanpa beban lain, dan geometri simetris."
+        )
+
+    # 3. DIAGRAM GAYA GESER DAN MOMEN LENTUR
+    with st.expander(
+        "3. Diagram Gaya Geser dan Momen Lentur"
+    ):
+        st.markdown("""
+        Untuk balok sederhana dengan beban merata q
+        sepanjang bentang L, gaya geser dan momen pada
+        jarak x dari tumpuan A adalah:
+        """)
+
+        st.markdown("**Gaya geser**")
+        st.latex(r"V(x)=\frac{qL}{2}-qx")
+
+        st.markdown("**Momen lentur**")
+        st.latex(r"M(x)=\frac{qL}{2}x-\frac{qx^2}{2}")
+
+        st.markdown("**Gaya geser maksimum**")
+        st.latex(r"|V_{\max}|=\frac{qL}{2}")
+
+        st.markdown("**Momen lentur maksimum**")
+        st.latex(r"M_{\max}=\frac{qL^2}{8}")
+
+        st.caption(
+            "Berlaku untuk balok sederhana dengan beban merata "
+            "penuh. Diagram gaya geser linier dan diagram momen "
+            "berbentuk parabola."
+        )
+
+    # 4. PEMERIKSAAN KAPASITAS LENTUR DAN GESER
+    with st.expander(
+        "4. Pemeriksaan Kapasitas Lentur dan Geser"
+    ):
+        st.markdown(
+            "Pemeriksaan harus mengikuti jenis material dan "
+            "standar desain yang berlaku."
+        )
+
+        st.markdown("**Pemeriksaan lentur**")
+        st.latex(r"M_u\leq\phi M_n")
+
+        st.markdown("**Pemeriksaan geser**")
+        st.latex(r"V_u\leq\phi V_n")
+
+        st.markdown("""
+        Keterangan:
+        - M_u: momen lentur akibat kombinasi beban desain.
+        - V_u: gaya geser akibat kombinasi beban desain.
+        - M_n: kapasitas nominal lentur.
+        - V_n: kapasitas nominal geser.
+        - φ: faktor reduksi kekuatan sesuai standar terkait.
+        """)
+
+        st.warning(
+            "Belum dapat ditentukan aman atau tidak aman tanpa "
+            "data penampang, material, tulangan atau profil, "
+            "panjang efektif, kondisi tumpuan, dan kombinasi beban."
+        )
+
+    # 5. INTERPRETASI RESPONS SENSOR
+    with st.expander(
+        "5. Interpretasi Respons Sensor dan Keterbatasan Data"
+    ):
+        st.markdown("""
+        Bedakan jenis data berikut:
+
+        1. Data aktual dari sensor dan sistem akuisisi.
+        2. Data simulasi atau input manual.
+        3. Data hasil pengolahan atau estimasi algoritma.
+
+        Nilai microstrain menunjukkan regangan, bukan langsung
+        tegangan, kapasitas, atau tingkat keamanan struktur.
+        """)
+
+        st.markdown("**Hubungan tegangan dan regangan elastis**")
+        st.latex(r"\sigma=E\varepsilon")
+
+        st.markdown(
+            "Konversi microstrain menjadi regangan tak berdimensi:"
+        )
+        st.latex(
+            r"\varepsilon=\varepsilon_{\mu\varepsilon}\times10^{-6}"
+        )
+
+        st.markdown("""
+        Keterangan:
+        - σ: tegangan normal.
+        - E: modulus elastisitas material.
+        - ε: regangan tak berdimensi.
+        """)
+
+        st.warning(
+            "Interpretasi memerlukan informasi kalibrasi sensor, "
+            "lokasi pemasangan, satuan, waktu pengukuran, kualitas "
+            "sinyal, dan pengaruh lingkungan. Hubungan σ = Eε "
+            "berlaku dengan asumsi elastis linear yang sesuai."
+        )
+
+    # 6. VERIFIKASI GAMBAR, SPESIFIKASI, DAN STANDAR
+    with st.expander(
+        "6. Verifikasi Gambar, Spesifikasi, dan Standar Desain"
+    ):
+        st.markdown("""
+        **Daftar periksa verifikasi:**
+
+        1. Periksa identitas, revisi, dan tanggal gambar.
+        2. Cocokkan dimensi lapangan dengan gambar desain.
+        3. Verifikasi mutu material berdasarkan dokumen dan hasil uji.
+        4. Periksa beban dan kombinasi beban yang digunakan.
+        5. Bandingkan gaya dalam dengan kapasitas elemen.
+        6. Catat penyimpangan, bukti, dan tindak lanjut.
+        """)
+
+        status = st.selectbox(
+            "Status pemeriksaan edukatif",
+            [
+                "Belum diperiksa",
+                "Sesuai berdasarkan bukti yang tersedia",
+                "Ada penyimpangan",
+                "Data belum mencukupi"
+            ],
+            key="edukasi_status_verifikasi"
+        )
+
+        catatan = st.text_area(
+            "Catatan dan bukti pemeriksaan",
+            placeholder=(
+                "Masukkan nomor gambar, lokasi elemen, "
+                "hasil pengukuran, atau temuan."
+            ),
+            key="edukasi_catatan_verifikasi"
+        )
+
+        st.write("Status yang dipilih:", status)
+
+        if catatan.strip():
+            st.write("Catatan:", catatan)
+
+        st.caption(
+            "Status dan catatan ini hanya untuk demonstrasi. "
+            "Belum tersimpan sebagai rekaman audit permanen."
+        )
+
+        st.markdown("**Rujukan standar yang perlu diverifikasi**")
+        st.markdown("""
+        - SNI 1725:2016 — Pembebanan untuk Jembatan.
+        - SNI 2833:2016 — Perancangan Jembatan terhadap Beban Gempa.
+        """)
+
+        st.warning(
+            "Periksa status keberlakuan, standar pengganti, "
+            "dan nomor pasal pada dokumen resmi BSN atau "
+            "Bina Marga sebelum menjadikannya dasar keputusan teknis."
+        )
 
 
 # TAB 3: BASIS DATA EXCEL
