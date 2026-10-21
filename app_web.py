@@ -6,9 +6,55 @@ from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, r2_score
+import os
+from openai import OpenAI
 
 # 1. KONFIGURASI FRONT-END UTAMA (TEMA PREMIUM & ELEGAN)
 st.set_page_config(page_title="AI Structural Monitoring Dashboard", layout="wide", initial_sidebar_state="expanded")
+
+def jawab_lokal(pertanyaan):
+    """Jawaban dasar Teknik Sipil tanpa OpenAI API."""
+    q = pertanyaan.lower()
+
+    if "apa itu beton" in q or "pengertian beton" in q:
+        return (
+            "Beton adalah material komposit yang umumnya terdiri atas "
+            "semen hidraulis, air, agregat halus, dan agregat kasar. "
+            "Kinerja beton dipengaruhi oleh proporsi campuran, kualitas "
+            "bahan, pemadatan, dan perawatan (curing). Gunakan standar "
+            "yang relevan dan data hasil pengujian material."
+        )
+
+    if "reaksi tumpuan" in q:
+        return (
+            "Reaksi tumpuan dihitung menggunakan keseimbangan statika: "
+            "ΣFx = 0, ΣFy = 0, dan ΣM = 0. Tumpuan sendi menahan gaya "
+            "horizontal dan vertikal; rol menahan satu arah gaya; "
+            "jepit menahan gaya horizontal, vertikal, dan momen. "
+            "Perhitungan numerik memerlukan skema struktur dan beban."
+        )
+
+    if "gaya geser" in q or "momen lentur" in q:
+        return (
+            "Gaya geser dan momen lentur ditentukan dari keseimbangan "
+            "struktur, beban, panjang bentang, dan kondisi tumpuan. "
+            "Masukkan data struktur untuk memperoleh perhitungan numerik."
+        )
+
+    if "geoteknik" in q or "daya dukung tanah" in q:
+        return (
+            "Analisis geoteknik memerlukan data tanah, stratigrafi, "
+            "muka air tanah, beban fondasi, dimensi fondasi, dan "
+            "parameter tanah. Daya dukung serta penurunan harus "
+            "diperiksa sesuai kondisi proyek dan standar yang berlaku."
+        )
+
+    return (
+        "Pertanyaan belum tersedia dalam materi jawaban lokal. "
+        "Coba kata kunci: apa itu beton, reaksi tumpuan, gaya geser, "
+        "momen lentur, atau daya dukung tanah. Jawaban ini merupakan "
+        "penjelasan awal, bukan verifikasi desain struktur."
+    )
 
 # DESAIN CSS ADVANCED: Latar Belakang Gradasi Teknik & Kartu Metrik Kelas Industri
 st.markdown("""
@@ -158,6 +204,64 @@ with tab_dashboard:
     )
 
 
+# FORM INPUT DATA SENSOR
+st.markdown("### Input Data Sensor")
+
+with st.form("form_input_sensor"):
+    col1, col2 = st.columns(2)
+
+    with col1:
+        sensor_kiri = st.number_input(
+            "Sensor Tumpuan Kiri (microstrain)",
+            value=0.0,
+            format="%.3f"
+        )
+        sensor_tengah = st.number_input(
+            "Sensor Tengah Bentang (microstrain)",
+            value=0.0,
+            format="%.3f"
+        )
+
+    with col2:
+        sensor_kanan = st.number_input(
+            "Sensor Tumpuan Kanan (microstrain)",
+            value=0.0,
+            format="%.3f"
+        )
+        momen_aktif = st.number_input(
+            "Momen Aktif (kN·m)",
+            value=0.0,
+            format="%.3f"
+        )
+
+    waktu_data = st.text_input(
+        "Waktu pengukuran",
+        placeholder="Contoh: 2026-10-21 14:30"
+    )
+
+    simpan = st.form_submit_button("Simpan Data Sensor")
+
+if simpan:
+    data_baru = {
+        "Waktu Pengukuran": waktu_data,
+        "Sensor_Tumpuan_Kiri": sensor_kiri,
+        "Sensor_Tengah_Bentang": sensor_tengah,
+        "Sensor_Tumpuan_Kanan": sensor_kanan,
+        "Momen_Aktif_kNm": momen_aktif
+    }
+
+    st.session_state.setdefault("data_input_sensor", [])
+    st.session_state["data_input_sensor"].append(data_baru)
+
+    st.success("Data sensor ditambahkan ke sesi aplikasi.")
+
+if st.session_state.get("data_input_sensor"):
+    st.markdown("#### Data Sensor yang Diinput")
+    st.dataframe(
+        pd.DataFrame(st.session_state["data_input_sensor"]),
+        use_container_width=True
+    )
+
 # TAB 2: DOKUMENTASI EDUKASI
 with tab_edukasi:
     st.subheader("Dokumentasi Edukasi Teknik Struktur")
@@ -209,113 +313,180 @@ with tab_analisis:
         "model, beban, kapasitas, dan validitas data sensor."
     )
 
-    # TANYA JAWAB UMUM TEKNIK SIPIL
+    
+    # =========================================================
+    # TANYA JAWAB UMUM TEKNIK SIPIL BERBASIS AI
+    # =========================================================
+
     st.divider()
-    st.subheader("💬 Tanya Jawab Umum Teknik Sipil")
+    st.subheader("💬 Asisten AI Teknik Sipil")
     st.caption(
-        "Topik: struktur, beton, baja, geoteknik, jalan, "
-        "jembatan, material, pengujian, dan manajemen konstruksi."
+        "Tanyakan konsep, metode, analisis, perhitungan, "
+        "material, geoteknik, struktur, konstruksi, dan standar."
     )
 
-    pertanyaan = st.text_area(
-        "Tuliskan pertanyaan Teknik Sipil Anda:",
-        placeholder=(
-            "Contoh: Apa dasar pemeriksaan lentur balok beton "
-            "bertulang berdasarkan SNI?"
-        ),
-        key="pertanyaan_teknik_sipil",
-        height=100,
-    )
+    # Ambil API key dari environment atau Streamlit Secrets
+    api_key = os.getenv("OPENAI_API_KEY")
 
-    if st.button("Cari Jawaban", key="btn_tanya_teknik_sipil"):
-        if not pertanyaan.strip():
+    if not api_key:
+        try:
+            api_key = st.secrets.get("OPENAI_API_KEY", "")
+        except Exception:
+            api_key = ""
+
+    # Riwayat percakapan disimpan selama sesi berlangsung
+    if "riwayat_tanya_teknik_sipil" not in st.session_state:
+        st.session_state.riwayat_tanya_teknik_sipil = []
+
+    # Tampilkan percakapan sebelumnya
+    for pesan in st.session_state.riwayat_tanya_teknik_sipil:
+        with st.chat_message(pesan["role"]):
+            st.markdown(pesan["content"])
+
+    # Form pertanyaan
+    with st.form(
+        "form_asisten_teknik_sipil",
+        clear_on_submit=True
+    ):
+        pertanyaan_ai = st.text_area(
+            "Tuliskan pertanyaan Teknik Sipil:",
+            placeholder=(
+                "Contoh:\n"
+                "- Apa itu beton?\n"
+                "- Hitung reaksi tumpuan balok sederhana.\n"
+                "- Bagaimana pemeriksaan lentur balok beton?\n"
+                "- Bagaimana analisis daya dukung fondasi?\n"
+                "- Apa perbedaan metode LRFD dan ASD?"
+            ),
+            height=130,
+            key="input_pertanyaan_ai",
+        )
+
+        kirim_pertanyaan = st.form_submit_button(
+            "🚀 Tanya AI Teknik Sipil",
+            use_container_width=True,
+        )
+
+    if kirim_pertanyaan:
+        if not pertanyaan_ai.strip():
             st.warning("Masukkan pertanyaan terlebih dahulu.")
+
+        elif not api_key:
+            st.error(
+                "API key belum dikonfigurasi. "
+                "Ikuti petunjuk konfigurasi API key di bawah kode."
+            )
+
         else:
-            p = pertanyaan.lower()
+            try:
+                with st.spinner(
+                    "AI sedang menganalisis pertanyaan Anda..."
+                ):
+                    client = OpenAI(api_key=api_key)
 
-            referensi = [
-                {
-                    "kata": ["beton bertulang", "balok beton", "kolom beton"],
-                    "topik": "Struktur beton bertulang",
-                    "jawaban": (
-                        "Pemeriksaan umumnya mencakup kekuatan lentur, "
-                        "geser, aksial, penyaluran tulangan, dan "
-                        "kemampuan layan. Parameter desain dan "
-                        "ketentuan detail harus diperiksa terhadap "
-                        "standar yang berlaku serta kondisi proyek."
-                    ),
-                    "standar": "SNI 2847:2019; ACI 318 sebagai referensi terkait."
-                },
-                {
-                    "kata": ["beban", "beban hidup", "beban mati", "angin"],
-                    "topik": "Beban dan kombinasi pembebanan",
-                    "jawaban": (
-                        "Identifikasi beban mati, beban hidup, angin, "
-                        "gempa, dan beban lain yang relevan. Tentukan "
-                        "kombinasi beban sesuai fungsi bangunan dan "
-                        "ketentuan desain yang berlaku."
-                    ),
-                    "standar": "SNI 1727:2020; SNI 1726:2019 untuk aspek gempa."
-                },
-                {
-                    "kata": ["baja", "profil wf", "struktur baja"],
-                    "topik": "Struktur baja",
-                    "jawaban": (
-                        "Pemeriksaan dapat meliputi tarik, tekan, "
-                        "lentur, geser, tekuk lokal, tekuk lateral, "
-                        "sambungan, dan kondisi layan. Verifikasi "
-                        "mutu material, dimensi, tumpuan, serta "
-                        "kombinasi pembebanan."
-                    ),
-                    "standar": "SNI 1729:2020; AISC 360 sebagai referensi terkait."
-                },
-                {
-                    "kata": ["tanah", "pondasi", "fondasi", "sondir", "cpt"],
-                    "topik": "Geoteknik dan fondasi",
-                    "jawaban": (
-                        "Analisis bergantung pada stratigrafi tanah, "
-                        "hasil investigasi, daya dukung, penurunan, "
-                        "air tanah, dan kondisi konstruksi. Data "
-                        "sondir saja tidak selalu cukup untuk seluruh "
-                        "parameter desain."
-                    ),
-                    "standar": "SNI 8460:2017; standar pengujian tanah ASTM yang relevan."
-                },
-                {
-                    "kata": ["agregat", "semen", "kuat tekan beton", "silinder"],
-                    "topik": "Material dan pengujian beton",
-                    "jawaban": (
-                        "Pastikan prosedur pengambilan sampel, "
-                        "pembuatan benda uji, perawatan, umur uji, "
-                        "dan pengujian mengikuti metode yang sesuai. "
-                        "Hasil harus dibandingkan dengan kriteria "
-                        "penerimaan yang berlaku."
-                    ),
-                    "standar": "SNI terkait beton dan pengujian; ASTM C39/C39M untuk kuat tekan silinder."
-                },
-            ]
-
-            hasil = [
-                r for r in referensi
-                if any(k in p for k in r["kata"])
-            ]
-
-            if hasil:
-                for r in hasil:
-                    st.markdown(f"### {r['topik']}")
-                    st.write(r["jawaban"])
-                    st.caption(
-                        "Referensi awal: " + r["standar"]
+                    # Kirim riwayat terbatas agar percakapan
+                    # sebelumnya tetap menjadi konteks.
+                    riwayat = (
+                        st.session_state.riwayat_tanya_teknik_sipil
                     )
-            else:
-                st.info(
-                    "Belum ditemukan jawaban pada basis pengetahuan "
-                    "awal. Pertanyaan perlu ditelaah menggunakan "
-                    "standar resmi yang relevan."
+
+                    input_ai = riwayat[-10:] + [
+                        {
+                            "role": "user",
+                            "content": pertanyaan_ai.strip(),
+                        }
+                    ]
+
+                    instruksi_ai = """
+Anda adalah Asisten AI Teknik Sipil yang membantu
+mahasiswa, insinyur, konsultan, pelaksana konstruksi,
+pengawas, dan pemeriksa pekerjaan.
+
+CAKUPAN:
+1. Mekanika teknik dan analisis struktur.
+2. Beton bertulang, beton prategang, dan struktur baja.
+3. Geoteknik, penyelidikan tanah, dan fondasi.
+4. Jalan, jembatan, drainase, hidrologi, dan sumber daya air.
+5. Material, pengujian, kendali mutu, dan metode konstruksi.
+6. RAB, AHSP, estimasi biaya, manajemen proyek, dan BIM.
+7. Perhitungan teknik, rumus, asumsi, satuan, dan interpretasi hasil.
+8. SNI, ACI, ASTM, AISC, serta ketentuan teknis terkait.
+
+ATURAN JAWABAN:
+- Jawab dalam Bahasa Indonesia yang jelas, sistematis,
+  profesional, dan sesuai konteks pertanyaan.
+- Jawab langsung pertanyaan pengguna, termasuk pertanyaan
+  dasar seperti "Apa itu beton?".
+- Untuk perhitungan, jelaskan data diketahui, asumsi,
+  rumus, substitusi angka, satuan, hasil, dan pemeriksaan
+  kewajaran hasil bila relevan.
+- Jika data tidak cukup, nyatakan data yang kurang.
+  Jangan mengarang dimensi, beban, mutu material, atau hasil uji.
+- Bedakan fakta, asumsi, pendekatan awal, dan kesimpulan.
+- Jangan mengarang nomor pasal, judul standar, kutipan,
+  status berlaku, edisi, atau hasil verifikasi.
+- Jika tidak yakin terhadap suatu ketentuan standar,
+  nyatakan bahwa ketentuan tersebut harus diperiksa
+  pada dokumen resmi.
+- Jangan mengklaim telah membuka atau memeriksa dokumen
+  SNI, ACI, ASTM, gambar, atau data yang tidak diberikan.
+- Untuk desain atau evaluasi struktur nyata, jelaskan
+  batasan analisis dan perlunya pemeriksaan oleh tenaga
+  ahli yang kompeten sebelum keputusan pelaksanaan.
+- Jika pertanyaan tidak berkaitan dengan Teknik Sipil,
+  jelaskan bahwa fokus asisten ini adalah Teknik Sipil.
+- Gunakan tabel atau daftar langkah jika membantu.
+- Jangan menyatakan jawaban sebagai terverifikasi jika
+  belum ada bukti atau data yang memadai.
+"""
+
+                    jawaban_ai = jawab_lokal(pertanyaan_ai.strip())
+                    if not jawaban_ai:
+                        raise ValueError(
+                            "Jawaban lokal tidak tersedia."
+                       
+                        )
+                    
+                # Simpan percakapan setelah respons berhasil
+                st.session_state.riwayat_tanya_teknik_sipil.extend(
+                    [
+                        {
+                            "role": "user",
+                            "content": pertanyaan_ai.strip(),
+                        },
+                        {
+                            "role": "assistant",
+                            "content": jawaban_ai,
+                        },
+                    ]
                 )
 
-            st.warning(
-                "Verifikasi nomor, edisi, status berlaku, amendemen, "
-                "dan pasal standar pada sumber resmi sebelum "
-                "digunakan untuk keputusan desain atau pemeriksaan."
-            )
+                # Tampilkan jawaban pada pengiriman saat ini
+                with st.chat_message("user"):
+                    st.markdown(pertanyaan_ai.strip())
+
+                with st.chat_message("assistant"):
+                    st.markdown(jawaban_ai)
+
+            except Exception as e:
+                st.error(
+                    "Permintaan AI gagal diproses. Periksa koneksi, "
+                    "API key, akses model, saldo atau batas penggunaan "
+                    "API, serta pesan kesalahan pada terminal."
+                )
+                st.caption(f"Detail teknis: {str(e)}")
+
+    # Peringatan teknis
+    st.info(
+        "Jawaban AI merupakan bantuan analisis awal. "
+        "Verifikasi perhitungan, data lapangan, dokumen resmi, "
+        "edisi standar, dan pasal yang relevan sebelum digunakan "
+        "untuk desain, audit, atau keputusan konstruksi."
+    )
+
+    if st.button(
+        "🗑️ Hapus Riwayat Percakapan",
+        key="hapus_riwayat_teknik_sipil",
+    ):
+        st.session_state.riwayat_tanya_teknik_sipil = []
+        st.rerun()
