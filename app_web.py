@@ -75,16 +75,16 @@ st.markdown('<p class="main-title">🏗️ Dasbor AI Monitoring Gaya Dalam & Kes
 st.markdown('<p class="sub-title">Sistem Peringatan Dini Kesehatan Jembatan Berbasis Sensor IoT & Jaringan Saraf Tiruan</p>', unsafe_allow_html=True)
 
 # 4. ENGINE BACKEND: LOADING DATA & TRAINING AI
-      # Penentuan Indikator Status Batas Keamanan Struktur (Safety Threshold)
+     # Penentuan Indikator Status Batas Keamanan Struktur (Safety Threshold)
         if prediksi_momen > 500:
             st.error(f"🚨 STATUS: BAHAYA (CRITICAL RISK)")
-            st.info(f"Estimasi Momen Tengah: {prediksi_momen[0]:.2f} kNm. Struktur jembatan telah melewati Batas Ultra (Ultimate Limit State)!")
+            st.info(f"Estimasi Momen Tengah: {prediksi_momen:.2f} kNm. Struktur jembatan telah melewati Batas Ultra (Ultimate Limit State)!")
         elif prediksi_momen > 300:
             st.warning(f"⚠️ STATUS: WASPADA (WARNING)")
-            st.info(f"Estimasi Momen Tengah: {prediksi_momen[0]:.2f} kNm. Tegangan struktur mendekati Batas Layan (Serviceability Limit State).")
+            st.info(f"Estimasi Momen Tengah: {prediksi_momen:.2f} kNm. Tegangan struktur mendekati Batas Layan (Serviceability Limit State).")
         else:
             st.success(f"✅ STATUS: AMAN (NORMAL)")
-            st.info(f"Estimasi Momen Tengah: {prediksi_momen[0]:.2f} kNm. Struktur jembatan beroperasi penuh dalam kondisi elastis aman.")
+            st.info(f"Estimasi Momen Tengah: {prediksi_momen:.2f} kNm. Struktur jembatan beroperasi penuh dalam kondisi elastis aman.")
 
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
