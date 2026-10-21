@@ -1,127 +1,211 @@
-# ============================================================
-# 6. TABS DASHBOARD
-# ============================================================
-tab_dashboard, tab_edukasi, tab_data = st.tabs(
-    ["📊 Dasbor Monitoring", "📖 Dokumentasi Edukasi", "💾 Basis Data Excel"]
+import streamlit as st
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPRegressor
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error, r2_score
+
+# 1. KONFIGURASI FRONT-END UTAMA (TEMA PREMIUM & ELEGAN)
+st.set_page_config(page_title="AI Structural Monitoring Dashboard", layout="wide", initial_sidebar_state="expanded")
+
+# DESAIN CSS ADVANCED: Latar Belakang Gradasi Teknik & Kartu Metrik Kelas Industri
+st.markdown("""
+    <style>
+    /* Mengubah Latar Belakang Utama Aplikasi Web */
+    .stApp {
+        background: linear-gradient(135deg, #F0F4F8 0%, #E2E8F0 100%);
+    }
+    
+    /* Pengaturan Tipografi Judul Utama */
+    .main-title { 
+        font-size: 38px !important; 
+        font-weight: 800; 
+        color: #1E3A8A; 
+        text-align: left; 
+        margin-bottom: 5px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .sub-title { 
+        font-size: 18px !important; 
+        color: #475569; 
+        font-weight: 500; 
+        margin-bottom: 25px; 
+    }
+    
+    /* Desain Kartu Indikator Metrik Keren Bersayap & Bayangan Halus */
+    .card-metric { 
+        background: white; 
+        padding: 22px; 
+        border-radius: 12px; 
+        border-top: 4px solid #3B82F6; 
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+        transition: transform 0.2s;
+    }
+    .card-metric:hover {
+        transform: translateY(-3px);
+    }
+    
+    /* Styling Sidebar */
+    .css-12rw0g6, .stSidebar {
+        background-color: #0F172A !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# 2. SIDEBAR KIRI: PROFIL PENGEMBANG & INFORMASI TEKNIS
+with st.sidebar:
+    st.image("foto_kurniawan.jpg.jpg", width=180)
+    st.markdown(
+    '<p style="color:#FFFFFF; font-size:17px; font-weight:700;">👨‍💻 Kurniawan Ilyas</p>',
+    unsafe_allow_html=True
 )
 
+    st.markdown("<p style='color:#94A3B8; font-size:14px; margin-top:-10px;'>Analis AI Engineer Structure<br>Magister Teknik Sipil</p>", unsafe_allow_html=True)
+    st.markdown("---")
+    st.markdown("### 📚 **Informasi Edukasi**")
+    st.info("""
+    **Metode AI:** *Multi-Layer Perceptron (MLP)* Jaringan Saraf Tiruan.
+    
+    **Konsep Mekanika:** AI bertindak sebagai *Virtual Sensor* untuk memetakan hubungan non-linear antara regangan material (*microstrain*) akibat beban lalu lintas dengan respons gaya dalam momen lentur (**kNm**).
+    """)
+    st.markdown("---")
+    st.markdown("<p style='text-align:center; color:#64748B; font-size:12px;'>SHM AI System v2.0</p>", unsafe_allow_html=True)
+
+# 3. KONTEN UTAMA: HEADER
+st.markdown('<p class="main-title">🏗️ Dasbor AI Monitoring Gaya Dalam & Keandalan Struktur</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-title">Sistem Peringatan Dini Keandalan Jembatan Berbasis AI</p>', unsafe_allow_html=True)
+
+
+# 4. ENGINE BACKEND: LOADING DATA & TRAINING AI
+
+# A. IMPORT PUSTAKA BACKEND
+from pathlib import Path
+import pandas as pd
+import streamlit as st
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neural_network import MLPRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+
+
+# B. MEMUAT DATA EXCEL
+BASE_DIR = Path(__file__).resolve().parent
+FILE_EXCEL = BASE_DIR / "data_sensor_jembatan.xlsx"
+
+if not FILE_EXCEL.exists():
+    st.error(f"File Excel tidak ditemukan: {FILE_EXCEL}")
+    st.stop()
+
+df = pd.read_excel(FILE_EXCEL)
+
+tab_dashboard, tab_edukasi, tab_data, tab_analisis = st.tabs(
+    [
+        "📊 Dasbor Monitoring",
+        "📖 Dokumentasi Edukasi",
+        "📂 Basis Data Excel",
+        "🏗️ Analisis Gaya Dalam & Keandalan Struktur",
+    ]
+)
+
+# ============================================================
+# 6. KONTEN FRONT-END SETIAP TAB
+# ============================================================
+
+# TAB 1: DASBOR MONITORING
 with tab_dashboard:
-    st.warning(
-        "Mode saat ini menggunakan input slider untuk simulasi, bukan pembacaan "
-        "sensor IoT real-time. Status di bawah bukan keputusan keselamatan struktur."
-    )
-
-    m1, m2, m3 = st.columns(3)
-    with m1:
-        st.metric("R² pada data uji", f"{r2:.3f}" if np.isfinite(r2) else "Tidak tersedia")
-    with m2:
-        st.metric("RMSE data uji (kNm)", f"{rmse:.3f}")
-    with m3:
-        st.metric("Baris dataset valid", f"{len(df)}")
-
+    st.subheader("Analisis Gaya Dalam dan Keandalan Struktur Jembatan")
     st.caption(
-        "R² dapat bernilai negatif. Jangan menyebut R² × 100 sebagai persentase "
-        "akurasi tanpa definisi evaluasi yang sesuai."
+        "Dashboard ini menggunakan data dari data_sensor_jembatan.xlsx. "
+        "Hasil evaluasi kapasitas memerlukan parameter desain yang terverifikasi."
     )
 
-    left_col, right_col = st.columns([1.1, 0.9])
+    st.metric("Jumlah baris data Excel", f"{len(df):,}")
+    st.metric("Jumlah kolom data", f"{len(df.columns):,}")
 
-    with left_col:
-        st.markdown("#### 🔮 Panel Input Sensor")
-        st.caption("Ubah nilai berikut untuk menjalankan simulasi prediksi.")
+    st.markdown("### Grafik respons data sensor")
 
-        input_kiri = st.slider(
-            "Sensor Tumpuan Kiri (microstrain)", 0.0, 1000.0, 250.0, 1.0
-        )
-        input_tengah = st.slider(
-            "Sensor Tengah Bentang (microstrain)", 0.0, 1000.0, 400.0, 1.0
-        )
-        input_kanan = st.slider(
-            "Sensor Tumpuan Kanan (microstrain)", 0.0, 1000.0, 150.0, 1.0
-        )
+    # Pilih kolom numerik yang tersedia pada Excel
+    numeric_cols = df.select_dtypes(include="number").columns.tolist()
 
-        data_sensor_baru = pd.DataFrame(
-            [[input_kiri, input_tengah, input_kanan]],
-            columns=FITUR,
-        )
-        data_sensor_scaled = scaler.transform(data_sensor_baru)
-        prediksi_momen = float(ai_model.predict(data_sensor_scaled)[0])
-
-        st.metric("Estimasi momen hasil AI (kNm)", f"{prediksi_momen:.2f}")
-
-        # Ambang ini hanya contoh konfigurasi aplikasi.
-        # Jangan menafsirkannya sebagai batas layan/ultimit tanpa verifikasi desain.
-        st.markdown("#### Indikator berbasis ambang sementara")
-        st.caption(
-            "Ambang 300 dan 500 kNm di bawah hanya contoh pemrograman. "
-            "Ganti berdasarkan kriteria teknis yang disahkan untuk struktur yang dinilai."
+    if numeric_cols:
+        selected_cols = st.multiselect(
+            "Pilih variabel untuk ditampilkan",
+            options=numeric_cols,
+            default=numeric_cols[:min(3, len(numeric_cols))]
         )
 
-        if prediksi_momen > 500:
-            st.error("🚨 INDIKATOR: MELEBIHI AMBANG ATAS SEMENTARA")
-        elif prediksi_momen > 300:
-            st.warning("⚠️ INDIKATOR: MELEBIHI AMBANG BAWAH SEMENTARA")
+        if selected_cols:
+            st.line_chart(df[selected_cols])
         else:
-            st.info("ℹ️ INDIKATOR: DI BAWAH AMBANG BAWAH SEMENTARA")
+            st.info("Pilih minimal satu variabel untuk menampilkan grafik.")
+    else:
+        st.warning("Tidak ditemukan kolom numerik pada file Excel.")
 
-        st.download_button(
-            label="📥 Unduh Laporan Simulasi (.txt)",
-            data=(
-                "LAPORAN SIMULASI PREDIKSI AI\n"
-                "Sistem: AI Structural Monitoring Dashboard\n"
-                "Mode: Input slider/simulasi, bukan pembacaan sensor langsung\n\n"
-                f"Sensor kiri: {input_kiri:.2f} microstrain\n"
-                f"Sensor tengah: {input_tengah:.2f} microstrain\n"
-                f"Sensor kanan: {input_kanan:.2f} microstrain\n"
-                f"Estimasi momen AI: {prediksi_momen:.2f} kNm\n"
-                f"R2 data uji: {r2:.4f}\n"
-                f"MSE data uji: {mse:.4f}\n"
-                f"RMSE data uji: {rmse:.4f} kNm\n\n"
-                "PERINGATAN: Hasil ini merupakan estimasi model dan bukan "
-                "sertifikasi keselamatan struktur. Verifikasi dengan analisis "
-                "teknik dan data lapangan yang independen.\n"
-            ),
-            file_name="Laporan_Simulasi_Monitoring_AI.txt",
-            mime="text/plain",
-        )
-
-    with right_col:
-        st.markdown("#### 📉 Grafik Prediksi terhadap Target Data Uji")
-        fig, ax = plt.subplots(figsize=(5.2, 3.8))
-        ax.scatter(y_test, predictions, alpha=0.65, label="Prediksi MLP")
-
-        nilai_min = min(float(y_test.min()), float(np.min(predictions)))
-        nilai_max = max(float(y_test.max()), float(np.max(predictions)))
-        ax.plot(
-            [nilai_min, nilai_max],
-            [nilai_min, nilai_max],
-            linestyle="--",
-            linewidth=2,
-            label="Garis identitas",
-        )
-        ax.set_xlabel("Target pada dataset uji (kNm)")
-        ax.set_ylabel("Prediksi model (kNm)")
-        ax.legend(fontsize=8)
-        ax.grid(True, linestyle=":", alpha=0.5)
-        fig.tight_layout()
-        st.pyplot(fig, use_container_width=True)
-        plt.close(fig)
-
-with tab_edukasi:
-    st.markdown("### 📘 Dasar Teori Structural Health Monitoring")
-    st.write(
-        """
-        Model MLP mempelajari pola statistik antara fitur microstrain dan
-        target momen yang tersedia pada dataset. Model tidak otomatis
-        menghitung gaya dalam berdasarkan mekanika struktur; ia mengestimasi
-        target berdasarkan pola data latih.
-
-        Agar dapat digunakan sebagai sistem pendukung pemantauan, perlu dilakukan
-        validasi terhadap data independen, pemeriksaan kalibrasi sensor, evaluasi
-        rentang input, analisis ketidakpastian, serta verifikasi rekayasa struktur.
-        """
+    st.caption(
+        "Sumbu horizontal menunjukkan urutan baris Excel. "
+        "Sumbu tersebut bukan waktu aktual kecuali tersedia kolom waktu."
     )
 
+    st.markdown("### Pemeriksaan awal data")
+    st.write("Jumlah data kosong per kolom:")
+    st.dataframe(
+        df.isna().sum().rename("Jumlah data kosong").to_frame(),
+        use_container_width=True
+    )
+
+
+# TAB 2: DOKUMENTASI EDUKASI
+with tab_edukasi:
+    st.subheader("Dokumentasi Edukasi Teknik Struktur")
+
+    st.markdown("""
+    **Materi pemeriksaan struktur jembatan**
+
+    1. Statika dan mekanika rekayasa.
+    2. Reaksi perletakan dan keseimbangan struktur.
+    3. Diagram gaya geser dan momen lentur.
+    4. Pemeriksaan kapasitas lentur dan geser.
+    5. Interpretasi respons sensor dan keterbatasan data.
+    6. Verifikasi terhadap gambar, spesifikasi, dan standar desain
+       yang berlaku.
+    """)
+
+
+# TAB 3: BASIS DATA EXCEL
 with tab_data:
-    st.markdown("#### 💾 Dataset yang digunakan")
-    st.caption(
+    st.subheader("Basis Data Sensor Jembatan")
+
+    st.write(f"Nama file: {FILE_EXCEL.name}")
+    st.write(f"Jumlah baris: {len(df):,}")
+    st.write(f"Jumlah kolom: {len(df.columns):,}")
+
+    st.dataframe(df, use_container_width=True)
+
+    st.download_button(
+        label="Unduh data Excel",
+        data=FILE_EXCEL.read_bytes(),
+        file_name=FILE_EXCEL.name,
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+    
+# TAB 4: ANALISIS GAYA DALAM DAN KEANDALAN STRUKTUR
+with tab_analisis:
+    st.header("Analisis Gaya Dalam & Keandalan Struktur Jembatan")
+
+    st.write("Sumber data:", FILE_EXCEL.name)
+    st.write("Jumlah baris data sensor:", len(df))
+
+    st.subheader("Data sensor jembatan")
+    st.dataframe(df, use_container_width=True)
+
+    st.info(
+        "Data sensor ditampilkan untuk pemeriksaan awal. "
+        "Penilaian keandalan struktur memerlukan verifikasi "
+        "model, beban, kapasitas, dan validitas data sensor."
+    )
+
