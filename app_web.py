@@ -157,6 +157,11 @@ with st.sidebar:
             <b>Bertahan</b> bukan tentang seberapa berat
             beban engkau genggam, tetapi seberapa lama
             beban engkau genggam.
+            <br><br>
+            Dalam Mekanika Statika, Mekanika Rekayasa,<br>
+            dan Mekanika Bahan, dikenal konsep<br>
+            <b>Structural Durability, Long-Term Performance,<br>
+            Strength, Creep, Fatigue, dan Structural Performance.</b>
         </div>
         """,
         unsafe_allow_html=True
