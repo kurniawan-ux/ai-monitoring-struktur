@@ -81,6 +81,34 @@ st.markdown("""
         margin-bottom: 25px; 
     }
     
+/* Header judul dan logo pendukung */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    width: 100%;
+}
+
+.header-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.header-logos {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
+    flex-shrink: 0;
+}
+
+.header-logos img {
+    width: 100px;
+    max-height: 100px;
+    object-fit: contain;
+}
+
     /* Desain Kartu Indikator Metrik Keren Bersayap & Bayangan Halus */
     .card-metric { 
         background: white; 
@@ -156,12 +184,13 @@ with st.sidebar:
             <div style="font-size:22px; margin-bottom:10px;">💡</div>
             <b>Bertahan</b> bukan tentang seberapa berat
             beban engkau genggam, tetapi seberapa lama
-            beban engkau genggam.
+            beban engkau genggam. 
             <br><br>
             Dalam Mekanika Statika, Mekanika Rekayasa,<br>
             dan Mekanika Bahan, dikenal konsep<br>
             <b>Structural Durability, Long-Term Performance,<br>
             Strength, Creep, Fatigue, dan Structural Performance.</b>
+
         </div>
         """,
         unsafe_allow_html=True
@@ -171,8 +200,54 @@ with st.sidebar:
     st.markdown("<p style='text-align:center; color:#64748B; font-size:12px;'>SHM AI System v2.0</p>", unsafe_allow_html=True)
 
 # 3. KONTEN UTAMA: HEADER
-st.markdown('<p class="main-title">🏗️ Dasbor AI Monitoring Gaya Dalam & Keandalan Struktur</p>', unsafe_allow_html=True)
-st.markdown('<p class="sub-title">Sistem Peringatan Dini Keandalan Jembatan Berbasis AI</p>', unsafe_allow_html=True)
+
+col_judul, col_logo = st.columns([5, 2])
+
+with col_judul:
+    st.markdown(
+        '<p class="main-title">🏗️ Dasbor AI Monitoring Gaya Dalam & Keandalan Struktur</p>',
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        '<p class="sub-title">Sistem Peringatan Dini Keandalan Jembatan Berbasis AI</p>',
+        unsafe_allow_html=True
+    )
+
+
+
+# LOGO ITAKI DAN KINDO - SUPPORTED BY
+with col_logo:
+    st.markdown(
+        """
+        <div style="
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #111827;
+            margin: 0 0 6px 0;
+        ">
+            Supported By
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    _, logo_area, _ = st.columns([2, 1, 2], gap="small")
+
+    with logo_area:
+        logo_itaki, logo_kindo = st.columns(
+            [1, 1],
+            gap="small",
+        )
+
+        with logo_itaki:
+            st.image("logo_itaki.png.png", width=45)
+
+        with logo_kindo:
+            st.image("logo_kindo.png.png", width=45)
+
+
 
 
 # 4. ENGINE BACKEND: LOADING DATA & TRAINING AI
@@ -229,14 +304,16 @@ with st.sidebar.expander("🤖 AI Tanya Jawab Teknik Sipil", expanded=False):
 # 6. KONTEN FRONT-END SETIAP TAB
 # ============================================================
 
+
 tab_dashboard, tab_edukasi, tab_data, tab_analisis = st.tabs(
     [
         "📊 Dasbor Monitoring",
         "📖 Dokumentasi Edukasi",
-        "📂 Basis Data Excel",
+        "📁 Basis Data Excel",
         "🏗️ Analisis Gaya Dalam & Keandalan Struktur",
     ]
 )
+
 
 # TAB 1: DASBOR MONITORING
 with tab_dashboard:
