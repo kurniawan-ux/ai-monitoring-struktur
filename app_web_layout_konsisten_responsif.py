@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import altair as alt
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPRegressor
@@ -427,6 +428,7 @@ with tab_dashboard:
     # Pilih kolom numerik yang tersedia pada Excel
     numeric_cols = df.select_dtypes(include="number").columns.tolist()
 
+       
     if numeric_cols:
         selected_cols = st.multiselect(
             "Pilih variabel untuk ditampilkan",
@@ -435,24 +437,32 @@ with tab_dashboard:
         )
 
         if selected_cols:
-            st.line_chart(df[selected_cols])
+                chart_data = df[selected_cols].reset_index()
+                chart_data = chart_data.melt(
+                    id_vars="index",
+                    var_name="Sensor",
+                    value_name="Nilai"
+                )
+
+                chart = (
+                    alt.Chart(chart_data)
+                    .mark_line()
+                    .encode(
+                        x=alt.X("index:Q", title="Urutan Data"),
+                        y=alt.Y("Nilai:Q", title="Nilai"),
+                        color=alt.Color("Sensor:N", title="Sensor")
+                    )
+                    .properties(width="container")
+                )
+
+                st.altair_chart(chart, use_container_width=True)
         else:
-            st.info("Pilih minimal satu variabel untuk menampilkan grafik.")
-    else:
-        st.warning("Tidak ditemukan kolom numerik pada file Excel.")
+                st.info("Pilih minimal satu variabel untuk menampilkan grafik.")
+                
+# FORM INPUT DATA SENSOR
+st.markdown("### Input Data Sensor")
 
-    st.caption(
-        "Sumbu horizontal menunjukkan urutan baris Excel. "
-        "Sumbu tersebut bukan waktu aktual kecuali tersedia kolom waktu."
-    )
-
-    st.markdown("### Pemeriksaan awal data")
-    st.write("Jumlah data kosong per kolom:")
-    st.dataframe(
-        df.isna().sum().rename("Jumlah data kosong").to_frame(),
-        width="stretch"
-    )
-
+      
 
 # FORM INPUT DATA SENSOR
 st.markdown("### Input Data Sensor")
